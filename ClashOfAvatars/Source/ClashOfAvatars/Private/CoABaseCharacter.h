@@ -30,6 +30,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="COA")
 	float WalkSpeed;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="COA")
+	bool bDead;
 	
 
 	
@@ -44,6 +47,15 @@ public:
 	float GetHealth();
 	
 
+public:
+	UFUNCTION(BlueprintNativeEvent, Category = "COA")
+	float ModifyDamage(float IncomingDamage);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "COA")
+	void OnPlayerDied();
+	
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+		class AController* EventInstigator, AActor* DamageCauser) override;
 
 
 

@@ -78,9 +78,7 @@ void ACoAAvatar::Tick(float DeltaTime)
 
 
 
-
-
-
+	
 	if(GetCharacterMovement()->MovementMode == MOVE_Walking)
 	{
 		if (!bStaminaDrained && bRunKeyPressed)
