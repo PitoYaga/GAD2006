@@ -73,7 +73,7 @@ void AGameGrid::OnConstruction(const FTransform& Transform)
 
 AGameSlot* AGameGrid::GetSlot(FSGridPosition& Position)
 {
-	int GridIndex = Position.Row * NumCols + Position.Row;
+	int GridIndex = Position.Row * NumCols + Position.Col;
 	if (GridActors.IsValidIndex(GridIndex))
 	{
 		return Cast<AGameSlot>(GridActors[GridIndex]->GetChildActor());

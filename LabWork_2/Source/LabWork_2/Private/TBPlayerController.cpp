@@ -3,13 +3,11 @@
 
 #include "TBPlayerController.h"
 
-ATBPlayerController::ATBPlayerController():
-
-GameManager(nullptr)
+ATBPlayerController::ATBPlayerController()
 
 {
-	
 }
+
 
 void ATBPlayerController::BeginPlay()
 {
@@ -21,8 +19,10 @@ void ATBPlayerController::BeginPlay()
 
 void ATBPlayerController::OnACtorClicked(AActor* Actor, FKey Key)
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnClicked %s - %s"), *Actor->GetActorLabel(), *Key.ToString());
-	if(GameManager) GameManager->OnActorClicked(Actor, &Key);
+	UE_LOG(LogTemp, Warning, TEXT("OnClicked: %s - %s"), *Actor->GetActorLabel(), *Key.ToString());
+	if(GameManager) GameManager->OnActorClicked(Actor,  Key);
 }
+
+
 
 

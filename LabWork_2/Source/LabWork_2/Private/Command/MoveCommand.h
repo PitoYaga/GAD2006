@@ -16,7 +16,7 @@ public:
 	virtual void Execute() override;
 	virtual void Revert() override;
 
-
+	
 private:
 		FSGridPosition Source, Destination;
 };

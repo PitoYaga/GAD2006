@@ -46,7 +46,7 @@ public:
 	// Sets default values for this actor's properties
 	AGameManager();
 
-	void OnActorClicked(AActor* Actor, FKey* Key);
+	void OnActorClicked(AActor* Actor, FKey Key);
 	void CreateLevelActors(FSLevelInfo& LevelInfo);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -57,6 +57,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	AGameGrid* GameGrid;
+
+	
 	
 
 protected:
@@ -67,6 +69,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable)
+	bool UndoLastMove();
 
 
 

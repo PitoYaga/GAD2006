@@ -25,10 +25,18 @@ void MoveCommand::Execute()
 	check(UnitA);
 	UnitA->AssignToSlot(SlotB);
 	SlotB->SetState(GS_HighLigthed);
+	
 }
 
 void MoveCommand::Revert()
 {
+	AGameSlot* SlotA = AGameGrid::FindSlot(Source);
+	AGameSlot* SlotB = AGameGrid::FindSlot(Destination);
+
+	AUnitBase* UnitA = SlotB->Unit;
+	check(UnitA);
+	UnitA->AssignToSlot(SlotA);
+	SlotB->SetState(GS_Default);
 }
 
 

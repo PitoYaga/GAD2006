@@ -21,7 +21,7 @@ AGameManager::AGameManager():
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-void AGameManager::OnActorClicked(AActor* Actor, FKey* Key)
+void AGameManager::OnActorClicked(AActor* Actor, FKey Key)
 {
 	if(CurrentCommand.IsValid() && CurrentCommand->IsExecuting()) return;
 
@@ -37,7 +37,7 @@ void AGameManager::OnActorClicked(AActor* Actor, FKey* Key)
 
 	if (Slot->Unit == nullptr)
 	{
-		TShaderRef<MoveCommand> Cmd = MakeShared<MoveCommand>(ThePlayer->Slot->GridPosition, Slot->GridPosition);
+		TSharedRef<MoveCommand> Cmd = MakeShared<MoveCommand>(ThePlayer->Slot->GridPosition, Slot->GridPosition);
 		CommandPool.Add(Cmd);
 		Cmd->Execute();
 		CurrentCommand = Cmd;
@@ -89,5 +89,20 @@ void AGameManager::Tick(float DeltaTime)
 		CurrentCommand->Update(DeltaTime);
 	}
 	
+}
+
+bool AGameManager::UndoLastMove()
+{
+	if (CommandPool.Num() < 1)
+	{
+		return false;
+	}
+
+	TSharedRef<Command> Cmd  = CommandPool.Pop();
+	Cmd->Revert();
+	CurrentCommand = Cmd;
+	
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("%s"), UndoLastMove));
+	return true;
 }
 

@@ -21,7 +21,7 @@ public:
 
 	void BeginPlay() override;
 
-	void OnACtorClicked(AActor* Actor, FKey Key);
+	void OnACtorClicked(AActor* Slot, FKey Key);
 
 	UPROPERTY(BlueprintReadWrite)
 	AGameManager* GameManager;
