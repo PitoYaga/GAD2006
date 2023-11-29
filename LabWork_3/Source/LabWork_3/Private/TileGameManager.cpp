@@ -10,7 +10,8 @@
 ATileGameManager::ATileGameManager():
 
 GridSize(100),
-GridOffset(0,0,0.5f)
+GridOffset(0,0,0.5f),
+MapExtendsIntGrids(25)
 
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -31,8 +32,7 @@ GridOffset(0,0,0.5f)
 	GridSelection ->SetStaticMesh(PlaneMesh.Object);
 	GridSelection ->SetMaterial(0,GridMaterial.Object);
 	GridSelection ->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	HoloMesh->SetStaticMesh(TileTypes[CurrentTileIndex]->InstancedMesh->GetStaticMesh());
+	
 	HoloMesh->SetMaterial(0, GridDisplayMaterial.Object);
 	HoloMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
@@ -46,6 +46,7 @@ void ATileGameManager::BeginPlay()
 	{
 		PlayerController ->GameManager = this;
 	}
+	HoloMesh->SetStaticMesh(TileTypes[CurrentTileIndex]->InstancedMesh->GetStaticMesh());
 	
 }
 
@@ -87,6 +88,7 @@ void ATileGameManager::OnActorInteraction(AActor* HitActor, FVector& Location, b
 			Map[GridX][GridY] = SelectedTile;
 			
 			FTransform TileTransform(GridLoc+GridOffset);
+			TileTransform = FTransform(FRotator(0, RotationIndex * 90, 0), TileTransform.GetLocation(), TileTransform.GetScale3D());
 			SelectedTile->InstancedMesh->AddInstance(SelectedTile->InstancedMesh->GetRelativeTransform()*TileTransform,true);
 		}
 
@@ -96,15 +98,23 @@ void ATileGameManager::OnActorInteraction(AActor* HitActor, FVector& Location, b
 	
 	else if (Input->WasJustPressed(EKeys::MouseScrollUp))
 	{
-		CurrentTileIndex=(CurrentTileIndex - 1) %TileTypes.Num();
+		CurrentTileIndex=(CurrentTileIndex - 1) % TileTypes.Num();
 		if (CurrentTileIndex<0)
 		{
 			CurrentTileIndex = TileTypes.Num() - 1;
 		}
-		UE_LOG(LogTemp , Warning, TEXT("TileType: %s"), *TileTypes[CurrentTileIndex] ->GetActorLabel());
+		
 		HoloMesh->SetStaticMesh(TileTypes[CurrentTileIndex]->InstancedMesh->GetStaticMesh());
 	}
-	
+	else if (Input->WasJustPressed(EKeys::MouseScrollDown))
+	{
+		CurrentTileIndex = (CurrentTileIndex + 1) % TileTypes.Num();
+		if (CurrentTileIndex == TileTypes.Num())
+		{
+			CurrentTileIndex = 0;
+		}
+		HoloMesh->SetStaticMesh(TileTypes[CurrentTileIndex]->InstancedMesh->GetStaticMesh());
+	}
 	else
 	{
 		GridSelection ->SetWorldLocation(GridLoc +GridOffset);
