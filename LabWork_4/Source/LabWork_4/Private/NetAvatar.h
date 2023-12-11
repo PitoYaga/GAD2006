@@ -6,6 +6,7 @@
 #include "NetBaseCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "NetAvatar.generated.h"
 
 
