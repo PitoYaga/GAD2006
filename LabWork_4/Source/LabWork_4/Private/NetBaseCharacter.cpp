@@ -3,6 +3,7 @@
 
 #include "NetBaseCharacter.h"
 #include "NetGameInstance.h"
+#include "Net/UnrealNetwork.h"
 
 
 static UDataTable* SBodyParts = nullptr;
@@ -38,13 +39,16 @@ ANetBaseCharacter::ANetBaseCharacter()
 	PartBeard = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Beard"));
 	PartBeard->SetupAttachment(PartFace, FName("headSocket"));
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SK_Eyes(TEXT("")); //aaaaaaaaaa
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SK_Eyes(TEXT("StaticMesh'/Game/StylizedModularChar/Meshes/SM_Eyes.SM_Eyes'")); //aaaaaaaaaa
 
 	PartEyes = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Eyes"));
 	PartEyes->SetupAttachment(PartFace, FName("headSocket"));
 	PartEyes->SetStaticMesh(SK_Eyes.Object);
 
-	static ConstructorHelpers::FObjectFinder<UDataTable> DT_BodyParts(TEXT("")); //aaaaaaaaaaaaaa
+	FSMeshAssetList* List = GetBodyPartList(EBodyPart::BP_Legs, PartSelection.isFemale);
+	PartLegs->SetSkeletalMeshAsset(List->ListSkeletal[2]);
+
+	static ConstructorHelpers::FObjectFinder<UDataTable> DT_BodyParts(TEXT("DataTable'/Game/Efe/DT_BodyParts.DT_BodyParts'")); //aaaaaaaaaaaaaa
 	SBodyParts = DT_BodyParts.Object;
 	
 }
@@ -66,10 +70,13 @@ void ANetBaseCharacter::BeginPlay()
 void ANetBaseCharacter::SubmitPlayerInfoToServer_Implementation(FSPLayerInfo Info)
 {
 	PartSelection = Info.BodyParts;
-	if (HasAuthority())
-	{
-		OnRep_PlayerInfoChanged();
-	}
+	OnRep_PlayerInfoChanged();
+}
+
+void ANetBaseCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ANetBaseCharacter, PartSelection);
 }
 
 void ANetBaseCharacter::OnConstruction(const FTransform& Transform)

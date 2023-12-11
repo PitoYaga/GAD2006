@@ -16,14 +16,15 @@ enum class EBodyPart : uint8
 	BP_Hands = 3,
 	BP_Legs = 4,
 	BP_Beard = 5,
-	BP_COUNT = 6,
+	BP_EyeBrows = 6,
+	BP_COUNT = 7,
 };
 
 
 USTRUCT(BlueprintType)
 struct FSMeshAssetList : public FTableRowBase
 {
-	GENERATED_BODY()
+	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere)
 	TArray<USkeletalMesh*> ListSkeletal;
@@ -72,7 +73,8 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& Transform) override;
-	
+	virtual void GetLifetimeReplicatedProps(TArray < class FLifetimeProperty >& OutLifetimeProps) const override;
+
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -83,9 +85,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ChangeGender(bool isFemale);
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_PlayerInfoChanged)
 	FSBodyPartSelection PartSelection;
-
 	
 	UFUNCTION(Server, Reliable)
 	void SubmitPlayerInfoToServer(FSPLayerInfo Info);

@@ -15,8 +15,9 @@ class ANetAvatar : public ANetBaseCharacter
 {
 	GENERATED_BODY()
 
-
 public:
+	ANetAvatar();
+	
 	UPROPERTY(EditAnywhere)
 	UCameraComponent* Camera;
 
@@ -26,19 +27,21 @@ public:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(EditAnywhere)
-	float WalkSpeed;
-	
-	UPROPERTY(EditAnywhere)
-	float RunSpeed;
+	UPROPERTY(BlueprintReadWrite)
+	float UpdateSpeed;
 
-	UPROPERTY(EditAnywhere)
-	bool bRunKeyPressed;
+	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_PlayerSpeedChanged)
+	float Speed;
+
+	UFUNCTION()
+	void OnRep_PlayerSpeedChanged();
+
+	UFUNCTION(Server, Reliable)
+	void SetSpeedInServer(float speedFloat);
 
 private:
 	void MoveForward(float Amount);
 	void MoveRight(float Amount);
 	void RunPressed();
 	void RunRelased();
-	void UpdateMovementParams();
 };

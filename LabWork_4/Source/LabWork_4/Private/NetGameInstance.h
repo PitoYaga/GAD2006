@@ -18,10 +18,10 @@ class UNetGameInstance : public UGameInstance
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void Host(FString MapName, FSPLayerInfo &Info);
+	void Host(FString MapName, FSPLayerInfo Info);
 
 	UFUNCTION(BlueprintCallable)
-	void Join(FString Address, FSPLayerInfo &Info);
+	void Join(FString Address, FSPLayerInfo Info);
 
 	UPROPERTY(BlueprintReadWrite)
 	FSPLayerInfo PlayerInfo;

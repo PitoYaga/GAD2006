@@ -4,10 +4,12 @@
 #include "NetAvatar.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Net/UnrealNetwork.h"
 
 ANetAvatar::ANetAvatar():
-WalkSpeed(300.0f),
-RunSpeed(500.0f)
+UpdateSpeed(5.0f),
+Speed(150.0f)
+
 
 {
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
@@ -41,6 +43,26 @@ void ANetAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	PlayerInputComponent->BindAction("Run", IE_Released, this, &ANetAvatar::RunRelased);
 }
 
+void ANetAvatar::OnRep_PlayerSpeedChanged()
+{
+}
+
+void ANetAvatar::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ANetAvatar, Speed);
+}
+
+void ANetAvatar::SetSpeedInServer_Implementation(float speedFloat)
+{
+	Speed = speedFloat;
+	if (HasAuthority())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = Speed;
+	}
+}
+
+
 void ANetAvatar::MoveForward(float Amount)
 {
 	FRotator Rotation = GetController()->GetControlRotation();
@@ -59,18 +81,13 @@ void ANetAvatar::MoveRight(float Amount)
 
 void ANetAvatar::RunPressed()
 {
-	bRunKeyPressed = true;
-	UpdateMovementParams();
+	Speed = Speed * UpdateSpeed;
+	SetSpeedInServer(Speed);
 }
 
 void ANetAvatar::RunRelased()
 {
-	bRunKeyPressed = false;
-	UpdateMovementParams();
+	Speed = Speed / UpdateSpeed;
+	SetSpeedInServer(Speed);
 }
 
-void ANetAvatar::UpdateMovementParams()
-{
-	GetCharacterMovement()->MaxWalkSpeed =
-	bRunKeyPressed && !bRunKeyPressed ? RunSpeed : WalkSpeed;
-}
