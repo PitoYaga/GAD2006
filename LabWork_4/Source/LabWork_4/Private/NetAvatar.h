@@ -40,9 +40,12 @@ public:
 	UFUNCTION(Server, Reliable)
 	void SetSpeedInServer(float speedFloat);
 
+	UPROPERTY(BlueprintReadWrite)
+	float MovementScale;
+
 private:
-	void MoveForward(float Amount);
-	void MoveRight(float Amount);
+	void MoveForward(float Scale);
+	void MoveRight(float Scale);
 	void RunPressed();
 	void RunRelased();
 };

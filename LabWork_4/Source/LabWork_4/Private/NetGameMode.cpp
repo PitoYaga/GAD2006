@@ -5,11 +5,17 @@
 #include "NetBaseCharacter.h"
 #include "NetGameState.h"
 #include "NetPlayerState.h"
+#include "EngineUtils.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/PlayerStart.h"
 
 
-ANetGameMode::ANetGameMode()
+ANetGameMode::ANetGameMode():
+
+TotalPlayerCount(0),
+TotalGames(0),
+PlayerStartIndex(0)
+
 {
 	DefaultPawnClass = ANetBaseCharacter::StaticClass();
 	PlayerStateClass = ANetPlayerState::StaticClass();
@@ -47,7 +53,7 @@ void ANetGameMode::AvatarOverlapped(ANetAvatar* AvatarA, ANetAvatar* AvatarB)
 	GState->OnVictory();
 
 	for (APlayerController* Player : AllPlayers)
-	{
+	{ 
 		auto State = Player->GetPlayerState<ANetPlayerState>();
 
 		if (State->TeamID == EPlayerTeam::TEAM_Blue)

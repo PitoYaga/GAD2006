@@ -3,6 +3,7 @@
 
 #include "NetGameInstance.h"
 
+
 void UNetGameInstance::Host(FString MapName, FSPLayerInfo Info)
 {
 	GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Red, TEXT("Hosting Game..."));

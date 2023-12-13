@@ -1,10 +1,12 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+
 
 #pragma once
 
+
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Net/UnrealNetwork.h"
+#include "GameFramework/PlayerController.h"
+#include "Runtime/Engine/Classes/Engine/DataTable.h"
 #include "NetBaseCharacter.generated.h"
 
 
@@ -17,8 +19,9 @@ enum class EBodyPart : uint8
 	BP_Hands = 3,
 	BP_Legs = 4,
 	BP_Beard = 5,
-	BP_EyeBrows = 6,
-	BP_COUNT = 7,
+	BP_Eyebrows = 6,
+	BP_BodyType = 7,
+	BP_COUNT = 8,
 };
 
 
@@ -47,21 +50,6 @@ struct FSBodyPartSelection
 };
 
 
-USTRUCT(BlueprintType)
-struct FSPLayerInfo
-{
-	GENERATED_USTRUCT_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FText NickName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FSBodyPartSelection BodyParts;
-
-	bool Ready;
-};
-
-
 
 
 UCLASS()
@@ -80,22 +68,29 @@ public:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintPure)
+	FString GetCustomizationData();
+	void ParseCustomizationData(FString BodyPartData);
+	
 	UFUNCTION(BlueprintCallable)
 	void ChangeBodyPart(EBodyPart index, int value, bool DirectSet);
 
 	UFUNCTION(BlueprintCallable)
 	void ChangeGender(bool isFemale);
 
-	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_PlayerInfoChanged)
-	FSBodyPartSelection PartSelection;
-	
 	UFUNCTION(Server, Reliable)
 	void SubmitPlayerInfoToServer(FSPLayerInfo Info);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnPlayerInfoChanged();
+
 	UFUNCTION()
+	void CheckPlayerState();
+
+	UFUNCTION()
+	void CheckPlayerInfo();
 	void OnRep_PlayerInfoChanged();
 
-private:
 	UPROPERTY()
 	USkeletalMeshComponent* PartFace;
 
@@ -114,8 +109,13 @@ private:
 	UPROPERTY()
 	USkeletalMeshComponent* PartLegs;
 
-	static FSMeshAssetList* GetBodyPartList(EBodyPart part, bool isFemale);
+	bool PlayerInfoReceived;
 
+private:
+	
+	int BodyPartIndices[EBodyPart::BP_COUNT];
 	void UpdateBodyParts();
-
+	static FSMeshAssetList* GetBodyPartList(EBodyPart part, bool isFemale);
+	FTimerHandle ClientDataCheckTimer;
+	
 };

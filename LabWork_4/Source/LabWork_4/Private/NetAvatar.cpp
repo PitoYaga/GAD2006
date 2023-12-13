@@ -8,7 +8,8 @@
 
 ANetAvatar::ANetAvatar():
 UpdateSpeed(5.0f),
-Speed(150.0f)
+Speed(150.0f),
+MovementScale(1.0f)
 
 
 {
@@ -63,20 +64,20 @@ void ANetAvatar::SetSpeedInServer_Implementation(float speedFloat)
 }
 
 
-void ANetAvatar::MoveForward(float Amount)
+void ANetAvatar::MoveForward(float Scale)
 {
 	FRotator Rotation = GetController()->GetControlRotation();
 	FRotator YawRotation(0, Rotation.Yaw, 0);
 	FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	AddMovementInput(ForwardDirection, Amount);
+	AddMovementInput(ForwardDirection, MovementScale *Scale);
 }
 
-void ANetAvatar::MoveRight(float Amount)
+void ANetAvatar::MoveRight(float Scale)
 {
 	FRotator Rotation = GetController()->GetControlRotation();
 	FRotator YawRotation(0, Rotation.Yaw, 0);
 	FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-	AddMovementInput(ForwardDirection, Amount);
+	AddMovementInput(ForwardDirection, MovementScale *Scale);
 }
 
 void ANetAvatar::RunPressed()

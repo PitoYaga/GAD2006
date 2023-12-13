@@ -3,6 +3,7 @@
 
 #include "NetBaseCharacter.h"
 #include "NetGameInstance.h"
+#include "NetPlayerState.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -14,7 +15,8 @@ static const wchar_t* BodyPartNames[] =
 	TEXT("Chest"),
 	TEXT("Hands"),
 	TEXT("Legs"),
-	TEXT("Beard")
+	TEXT("Beard"),
+	TEXT("Eyebrow")
 };
 
 ANetBaseCharacter::ANetBaseCharacter()
@@ -45,10 +47,10 @@ ANetBaseCharacter::ANetBaseCharacter()
 	PartEyes->SetupAttachment(PartFace, FName("headSocket"));
 	PartEyes->SetStaticMesh(SK_Eyes.Object);
 
-	FSMeshAssetList* List = GetBodyPartList(EBodyPart::BP_Legs, PartSelection.isFemale);
-	PartLegs->SetSkeletalMeshAsset(List->ListSkeletal[2]);
+	//FSMeshAssetList* List = GetBodyPartList(EBodyPart::BP_Legs);
+	//PartLegs->SetSkeletalMeshAsset(List->ListSkeletal[2]);
 
-	static ConstructorHelpers::FObjectFinder<UDataTable> DT_BodyParts(TEXT("DataTable'/Game/Efe/DT_BodyParts.DT_BodyParts'")); //aaaaaaaaaaaaaa
+	static ConstructorHelpers::FObjectFinder<UDataTable> DT_BodyParts(TEXT("/Script/Engine.DataTable'/Game/Efe/DT_DataTable.DT_DataTable'")); //aaaaaaaaaaaaaa
 	SBodyParts = DT_BodyParts.Object;
 	
 }
@@ -60,7 +62,7 @@ void ANetBaseCharacter::BeginPlay()
 	if (IsLocallyControlled())
 	{
 		UNetGameInstance* Instance = Cast<UNetGameInstance>(GWorld->GetGameInstance());
-		if (Instance && Instance->PlayerInfo.Ready)
+		if (Instance) //&& Instance->PlayerInfo.Ready)
 		{
 			SubmitPlayerInfoToServer(Instance->PlayerInfo);
 		}
@@ -69,8 +71,11 @@ void ANetBaseCharacter::BeginPlay()
 
 void ANetBaseCharacter::SubmitPlayerInfoToServer_Implementation(FSPLayerInfo Info)
 {
-	PartSelection = Info.BodyParts;
-	OnRep_PlayerInfoChanged();
+	ANetPlayerState* State = GetPlayerState<ANetPlayerState>();
+	State->Data.NickName = Info.NickName;
+	State->Data.CustomizationData = Info.CustomizationData;
+	State->Data.TeamID = State->TeamID;
+	PlayerInfoReceived = true;
 }
 
 void ANetBaseCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -91,12 +96,33 @@ void ANetBaseCharacter::Tick(float DeltaTime)
 
 }
 
+FString ANetBaseCharacter::GetCustomizationData()
+{
+	FString Data;
+	for (size_t i = 0; i < (int)EBodyPart::BP_COUNT; i++)
+	{
+		Data += FString::FromInt(BodyPartIndices[i]);
+		if (i < ((int)(EBodyPart::BP_COUNT) - 1)) Data += TEXT(",");
+	}
+	return Data;
+}
+
+void ANetBaseCharacter::ParseCustomizationData(FString BodyPartData)
+{
+	TArray<FString> ArrayData;
+	BodyPartData.ParseIntoArray(ArrayData, TEXT(","));
+	for (size_t i = 0; i < ArrayData.Num(); i++)
+	{
+		BodyPartIndices[i] = FCString::Atoi(*ArrayData[i]);
+	}
+}
+
 void ANetBaseCharacter::ChangeBodyPart(EBodyPart index, int value, bool DirectSet)
 {
-	FSMeshAssetList* List = GetBodyPartList(index, PartSelection.isFemale);
+	FSMeshAssetList* List = GetBodyPartList(index, BodyPartIndices[(int)EBodyPart::BP_BodyType] != 0);
 	if (List == nullptr) return;
 
-	int CurrentIndex = PartSelection.Indicades[(int)index];
+	int CurrentIndex = BodyPartIndices[(int)index];
 
 	if (DirectSet)
 	{
@@ -112,7 +138,7 @@ void ANetBaseCharacter::ChangeBodyPart(EBodyPart index, int value, bool DirectSe
 	if (CurrentIndex < 0) CurrentIndex += Num;
 	else CurrentIndex %= Num;
 
-	PartSelection.Indicades[(int)index] = CurrentIndex;
+	BodyPartIndices[(int)index] = CurrentIndex;
 
 	switch(index)
 	{
@@ -135,6 +161,49 @@ void ANetBaseCharacter::ChangeGender(bool isFemale)
 {
 	PartSelection.isFemale = isFemale;
 	UpdateBodyParts();
+}
+
+void ANetBaseCharacter::CheckPlayerState()
+{
+	ANetPlayerState* State = GetPlayerState<ANetPlayerState>();
+	
+	if (State == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("State == nullptr"));
+		GWorld->GetTimerManager().SetTimer(ClientDataCheckTimer, this,
+			&ANetBaseCharacter::CheckPlayerInfo, 0.25f, false);
+	}
+	else
+	{
+		if (IsLocallyControlled())
+		{
+			UNetGameInstance* Instance = Cast<UNetGameInstance>(GWorld->GetGameInstance());
+			if (Instance)
+			{
+				SubmitPlayerInfoToServer(Instance->PlayerInfo);
+			}
+		}
+		CheckPlayerInfo();
+	}
+}
+
+void ANetBaseCharacter::CheckPlayerInfo()
+{
+	ANetPlayerState* State = GetPlayerState<ANetPlayerState>();
+	
+	if (State && PlayerInfoReceived)
+	{
+		ParseCustomizationData(State->Data.CustomizationData);
+		UpdateBodyParts();
+		OnPlayerInfoChanged();
+		SetActorHiddenInGame(false);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("State Not Recieved!"));
+		GWorld->GetTimerManager().SetTimer(ClientDataCheckTimer, this,
+			&ANetBaseCharacter::CheckPlayerInfo, 0.25f, false);
+	}
 }
 
 void ANetBaseCharacter::OnRep_PlayerInfoChanged()
