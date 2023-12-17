@@ -85,7 +85,7 @@ public:
 	void CheckPlayerInfo();
 
 	bool PlayerInfoReceived;
-private:
+
 	UPROPERTY()
 	USkeletalMeshComponent* PartFace;
 
@@ -98,20 +98,15 @@ private:
 	UPROPERTY()
 	UStaticMeshComponent* PartEyes;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	USkeletalMeshComponent* PartHands;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	USkeletalMeshComponent* PartLegs;
 
 	UPROPERTY()
 	UStaticMeshComponent*PartEyeBrow;
 
-	
-
-	
-
-	
 
 private:
 	int BodyPartIndices[EBodyPart::BP_COUNT];
