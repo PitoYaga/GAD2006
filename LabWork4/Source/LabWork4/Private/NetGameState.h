@@ -23,7 +23,7 @@ public:
 	ANetGameState();
 
 	UPROPERTY(BlueprintReadOnly,ReplicatedUsing=OnRep_Winner)
-	int WinningPlayer;
+	int32 WinningPlayer;
 
 
 	UFUNCTION()

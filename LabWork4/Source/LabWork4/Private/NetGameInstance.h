@@ -4,11 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
-#include "NetBaseCharacter.h"
 #include "NetGameInstance.generated.h"
-/**
- *
- */
+
+class ANetBaseCharacter;
+
+struct FSPlayerInfo;
+
+
+
 UENUM(BlueprintType)
 enum class EPlayerTeam: uint8
 {
@@ -38,22 +41,10 @@ struct FSPlayerInfo
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	EPlayerTeam TeamID;
-
-
-
-	
 };
 
-USTRUCT(BlueprintType)
-struct FSBodyPartSelection
-{
-	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY()
-	int Indices[(int)EBodyPart::BP_COUNT];
 
-	
-};
 
 UCLASS()
 class UNetGameInstance : public UGameInstance

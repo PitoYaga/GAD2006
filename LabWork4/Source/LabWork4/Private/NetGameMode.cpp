@@ -10,13 +10,47 @@
 #include "GameFramework/PlayerStart.h"
 
 
-ANetGameModeBase::ANetGameModeBase()
+
+
+ANetGameModeBase::ANetGameModeBase():
+MainGameTime(5),
+GameTime(5),
+TimeFinished(false),
+GameStarted(false),
+TotalPlayerCount(0),
+TotalGames(0),
+PlayerStartIndex(0)
+
 {
 	DefaultPawnClass = ANetBaseCharacter::StaticClass();
 	PlayerStateClass = ANetPlayerState::StaticClass();
-	GameStateClass=ANetGameState::StaticClass();
+	GameStateClass = ANetGameState::StaticClass();
 }
 
+void ANetGameModeBase::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
+void ANetGameModeBase::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (GameStarted)
+	{
+		if (GameTime > 0)
+		{
+			GameTime -= DeltaTime;
+		}
+		else if (GameTime <= 0 && TimeFinished == false)
+		{
+			GameTime = 0;
+			TimeFinished = true;
+			GameTimeFinish();
+		}
+	}
+}
 
 
 AActor* ANetGameModeBase::GetPlayerStart(FString Name, int Index)
@@ -35,28 +69,33 @@ AActor* ANetGameModeBase::GetPlayerStart(FString Name, int Index)
 	{
 		if (APlayerStart *PS =Cast<APlayerStart>(*It))
 		{
-			if (PS->PlayerStartTag ==PSName)return *It;
-			
+			if (PS->PlayerStartTag == PSName)return *It;
 		}
 	}
+
 	return nullptr;
 }
+
+
 AActor* ANetGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
 {
 	AActor*Start =AssignTeamAndPlayerStart(Player);
 	return Start ? Start :Super::ChoosePlayerStart_Implementation(Player);
 }
 
+
+
 void ANetGameModeBase::AvatarsOverlapped(ANetAvatar* AvatarA, ANetAvatar* AvatarB)
 {
 	ANetGameState*GState = GetGameState<ANetGameState>();
-	if (GState==nullptr|| GState ->WinningPlayer  >= 0)return;
+	if (GState==nullptr || GState->WinningPlayer >= 0)return;
+	
 	ANetPlayerState*StateA=AvatarA->GetPlayerState<ANetPlayerState>();
 	ANetPlayerState*StateB=AvatarB->GetPlayerState<ANetPlayerState>();
 
-	if (StateA->TeamID ==StateB->TeamID)return;
+	if (StateA->TeamID == StateB->TeamID) return;
 
-	if (StateA->TeamID ==EPlayerTeam::TEAM_Red)
+	if (StateA->TeamID ==EPlayerTeam::TEAM_Red && TimeFinished == false)
 	{
 		GState ->WinningPlayer =StateA ->PlayerIndex;
 	}
@@ -82,10 +121,12 @@ void ANetGameModeBase::AvatarsOverlapped(ANetAvatar* AvatarA, ANetAvatar* Avatar
 			State->Result =EGameResults::RESULT_Won;
 		}
 	}
-
+	SetActorTickEnabled(false);
 	FTimerHandle EndGameTimerHandle;
-	GWorld->GetTimerManager().SetTimer(EndGameTimerHandle,this,ANetGameModeBase::EndGame,2.5f,false);
+	GWorld->GetTimerManager().SetTimer(EndGameTimerHandle,this,&ANetGameModeBase::EndGame,2.5f,false);
 }
+
+
 
 void ANetGameModeBase::EndGame()
 {
@@ -100,9 +141,44 @@ void ANetGameModeBase::EndGame()
 		Player->StartSpot.Reset();
 		RestartPlayer(Player);
 	}
+	GameTime = MainGameTime;
+	TimeFinished = false;
+	SetActorTickEnabled(true);
 	ANetGameState*GState = GetGameState<ANetGameState>();
 	GState->TriggerRestart();
 }
+
+
+
+void ANetGameModeBase::GameTimeFinish()
+{
+	for (APlayerController* Player : AllPlayers)
+	{
+		auto State = Player->GetPlayerState<ANetPlayerState>();
+		if (State->TeamID == EPlayerTeam::TEAM_Blue)
+		{
+			State->Result = EGameResults::RESULT_Won;
+		}
+		else
+		{
+			State->Result = EGameResults::RESULT_Lost;
+		}
+	}
+
+	// Blue player wins
+	ANetGameState*GState = GetGameState<ANetGameState>();
+
+	//GState->WinningPlayer = MyNetAvatar->GetPlayerState<ANetPlayerState>()->PlayerIndex;
+
+	GState->OnVictory();
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Blue, TEXT("Time is out")); //GetGameState<ANetGameState>()->WinningPlayer
+	
+	FTimerHandle EndGameTimerHandle;
+	GWorld->GetTimerManager().SetTimer(EndGameTimerHandle,this,&ANetGameModeBase::EndGame,2.5f,false);
+}
+
+
+
 
 AActor* ANetGameModeBase::AssignTeamAndPlayerStart(AController* Player)
 {
@@ -131,8 +207,6 @@ AActor* ANetGameModeBase::AssignTeamAndPlayerStart(AController* Player)
 	{
 		Start =GetPlayerStart("Red",PlayerStartIndex++);
 	}
+	GameStarted = true;
 	return Start;
-
-
-	
 }

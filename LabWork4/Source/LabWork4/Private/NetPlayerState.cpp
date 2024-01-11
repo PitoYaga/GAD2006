@@ -7,9 +7,9 @@
 
 
 
-void ANetPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifeTimeProps) const
+void ANetPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
 {
-	Super::GetLifetimeReplicatedProps(OutLifeTimeProps);
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ANetPlayerState, Data);
 	DOREPLIFETIME(ANetPlayerState, PlayerIndex);
 }
@@ -26,7 +26,6 @@ void ANetPlayerState::OnRep_PlayerInfo()
 	else
 	{
 		FTimerHandle PlayerInfoUpdateTimer;
-		GWorld->GetTimerManager().SetTimer(PlayerInfoUpdateTimer,this,
-			&ANetPlayerState::OnRep_PlayerInfo,0.25f,false);
+		GWorld->GetTimerManager().SetTimer(PlayerInfoUpdateTimer,this, &ANetPlayerState::OnRep_PlayerInfo,0.25f,false);
 	}
 }

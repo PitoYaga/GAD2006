@@ -14,15 +14,15 @@ ANetGameState::ANetGameState():
 
 
 
-void ANetGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&OutLifeTimeProps) const
+void ANetGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&OutLifetimeProps) const
 {
-	Super::GetLifetimeReplicatedProps(OutLifeTimeProps);
-	DOREPLIFETIME(ANetGameState,WinningPlayer);
-	
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ANetGameState, WinningPlayer);
 }
+
 void ANetGameState::OnRep_Winner()
 {
-	if (WinningPlayer>0)
+	if (WinningPlayer > 0)
 	{
 		OnVictory();
 	}
@@ -33,7 +33,7 @@ ANetPlayerState* ANetGameState::GetPlayerStateByIndex(int PlayerIndex)
 	for (APlayerState*PS :PlayerArray)
 	{
 		ANetPlayerState*State =Cast<ANetPlayerState>(PS);
-		if (State&&State->PlayerIndex == PlayerIndex)
+		if (State && State->PlayerIndex == PlayerIndex)
 		{
 			return State;
 		}

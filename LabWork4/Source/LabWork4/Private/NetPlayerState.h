@@ -17,8 +17,6 @@ class ANetPlayerState : public APlayerState
 	
 	
 public:
-	
-
 	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_PlayerInfo)
 	FSPlayerInfo Data;
 

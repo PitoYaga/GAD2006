@@ -14,9 +14,15 @@ UCLASS()
 class ANetGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+
+protected:
+	virtual void BeginPlay() override;
+	
 public:
 	ANetGameModeBase();
 
+	virtual void Tick(float DeltaTime) override;
+	
 	virtual AActor*ChoosePlayerStart_Implementation(AController* Player) override;
 
 
@@ -25,6 +31,21 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void EndGame();
+
+	UFUNCTION(BlueprintCallable)
+	void GameTimeFinish();
+
+	UPROPERTY(BlueprintReadWrite)
+	float MainGameTime;
+	
+	UPROPERTY(BlueprintReadWrite)
+	float GameTime;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool TimeFinished;
+	
+	UPROPERTY()
+	bool GameStarted;
 
 
 

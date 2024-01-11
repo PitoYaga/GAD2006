@@ -52,7 +52,7 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& Transform)override;
-	virtual void GetLifetimeReplicatedProps(TArray <FLifetimeProperty>& OutLifetimeProps) const override;
+	//virtual void GetLifetimeReplicatedProps(TArray <FLifetimeProperty>& OutLifetimeProps) const override;
 
 
 protected:
@@ -69,8 +69,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ChangeBodyPart(EBodyPart index, int value, bool DirectSet);
 
-	UFUNCTION(BlueprintCallable)
-	void ChangeGender(bool isFemale);
+	//UFUNCTION(BlueprintCallable)
+	//void ChangeGender(bool isFemale);
 	
 	UFUNCTION(Server, Reliable)
 	void SubmitPlayerInfoToServer(FSPlayerInfo Info);
@@ -109,7 +109,7 @@ public:
 
 
 private:
-	int BodyPartIndices[EBodyPart::BP_COUNT];
+	int BodyPartIndices[(int)EBodyPart::BP_COUNT];
 
 	void UpdateBodyParts();
 

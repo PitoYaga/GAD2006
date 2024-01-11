@@ -36,6 +36,8 @@ public:
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_PlayerSpeedChanged)
 	float Speed;
 
+	UPROPERTY(BlueprintReadWrite)
+	float MovementScale;
 
 	UFUNCTION()
 	void OnRep_PlayerSpeedChanged();
